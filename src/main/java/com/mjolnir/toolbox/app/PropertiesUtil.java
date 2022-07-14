@@ -2,8 +2,9 @@
  * Copyright (c) 2020. Fenrir Solucoes em Tecnologia. All rights reserved.
  *  Fenrir Systems, Odin System and All the Programing Code of this softwares are private.
  */
-package com.mjolnir.commons;
+package com.mjolnir.toolbox.app;
 
+import com.mjolnir.toolbox.stardart.StringUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

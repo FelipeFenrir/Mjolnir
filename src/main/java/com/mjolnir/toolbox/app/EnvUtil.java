@@ -3,7 +3,9 @@
  *  Fenrir Systems, Odin System and All the Programing Code of this softwares are private.
  */
 
-package com.mjolnir.commons;
+package com.mjolnir.toolbox.app;
+
+import com.mjolnir.toolbox.stardart.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +51,6 @@ public class EnvUtil {
         if (singleInstance == null) {
             singleInstance = new EnvUtil();
         }
-
         return singleInstance;
     }
 

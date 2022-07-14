@@ -2,28 +2,30 @@
  * Copyright (c) 2020. Fenrir Solucoes em Tecnologia. All rights reserved.
  *  Fenrir Systems, Odin System and All the Programing Code of this softwares are private.
  */
-package com.mjolnir.commons;
+package com.mjolnir.toolbox.jwt;
 
-import br.com.fenrir.commons.utils.domain.auth.ConfigAuth;
-import br.com.fenrir.commons.utils.domain.auth.UserAuth;
+import com.mjolnir.toolbox.jwt.ConfigJwt;
+import com.mjolnir.toolbox.jwt.UserClaims;
 
 import java.util.Date;
 import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
+
 import javax.crypto.SecretKey;
 
 //import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.WeakKeyException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <br>
@@ -124,22 +126,22 @@ import org.slf4j.LoggerFactory;
  *
  * @author Felipe de Andrade Batista
  */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JwtUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtil.class);
 
     private static final long EXPIRATIONTIME = 3600000L;
 
     /**
      * This generate a JWT (Json Web Token) for Authentication.
      *
-     * @param config is a ConfigAuth object {@link ConfigAuth}.
-     * @param claims is a UserAuth object {@link UserAuth}.
+     * @param config is a ConfigAuth object {@link ConfigJwt}.
+     * @param claims is a UserAuth object {@link UserClaims}.
      * @param isTimeless is a flag that represents whether the token has
      * expired.
      * @return JWT token String.
      */
-    public static String gerarToken(ConfigAuth config, UserAuth claims, Boolean isTimeless) {
+    public static String generateToken(ConfigJwt config, UserClaims claims, Boolean isTimeless) {
         SignatureAlgorithm algValue;
         SecretKey key;
         String token = null;
@@ -148,13 +150,10 @@ public class JwtUtil {
             byte[] keyBytes = DatatypeConverter.parseBase64Binary(config.getSecretKey());
             key = Keys.hmacShaKeyFor(keyBytes);
 
-            final Map<String, Object> header = Jwts.header();
-            header.putAll(config.getConfigAuthMap());
-
             final Date iat = new Date();
 
             JwtBuilder compactJwsBuilder = Jwts.builder()
-                    .setHeader(header)
+                    .setHeader(config.getConfigAuthMap())
                     .setSubject(claims.getUserID())
                     .setIssuer(claims.getIssuerName())
                     .setAudience(claims.getAudienceName())
@@ -167,16 +166,16 @@ public class JwtUtil {
 
             token = compactJwsBuilder.compact();
         } catch (SignatureException ex) {
-            LOGGER.error("ERROR: The specified value does not match any"
+            log.error("ERROR: The specified value does not match any"
                     + " SignatureAlgorithm name, in JwtUtil Class.", ex);
         } catch (WeakKeyException ex) {
-            LOGGER.error("ERROR: The Secret Key byte array length is less than"
+            log.error("ERROR: The Secret Key byte array length is less than"
                     + " 256 bits (32 bytes), in JwtUtil Class.", ex);
         } catch (InvalidKeyException ex) {
-            LOGGER.error("ERROR: The HAMAC Key is insufficient or explicitly"
+            log.error("ERROR: The HAMAC Key is insufficient or explicitly"
                     + " disallowed by the JWT specification, in JwtUtil Class", ex);
         } catch (Exception ex) {
-            LOGGER.error("ERROR: An error in Token JWT generate Method in"
+            log.error("ERROR: An error in Token JWT generate Method in"
                     + " JwtUtil class.", ex);
         }
         return token;
@@ -198,16 +197,15 @@ public class JwtUtil {
 //        }
 //        return null;
 //    }
-//
+
     /**
      * Converte a String do Algoritimo de assinatura do Token em Objeto
      * SignatureAlgorithm {@link SignatureAlgorithm}.
      *
      * @param algorithm String que representa o Algoritimo.
      * @return Objeto SignatureAlgorithm.
-     * @throws SignatureException
      */
-    public static SignatureAlgorithm geSignaturetAlgorithm(String algorithm)
+    private static SignatureAlgorithm geSignaturetAlgorithm(String algorithm)
             throws SignatureException {
         return SignatureAlgorithm.forName(algorithm);
     }

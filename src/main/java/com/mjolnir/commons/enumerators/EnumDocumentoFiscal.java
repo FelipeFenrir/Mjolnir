@@ -4,8 +4,8 @@
  */
 package com.mjolnir.commons.enumerators;
 
-import com.mjolnir.commons.PropertiesUtil;
-import com.mjolnir.commons.StringUtil;
+import com.mjolnir.toolbox.app.PropertiesUtil;
+import com.mjolnir.toolbox.stardart.StringUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

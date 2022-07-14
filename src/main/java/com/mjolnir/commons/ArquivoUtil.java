@@ -32,58 +32,46 @@ import java.util.zip.ZipOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.mjolnir.toolbox.app.PropertiesUtil;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/**
- * Classe utilitaria para manipulação de arquivo.
- *
- * @author Felipe de Andrade Batista
- */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ArquivoUtil {
 
-    /**
-     * Encode de Arquivo.
-     */
     public static final String UTF8 = PropertiesUtil.getInstance().getPropertieByKey("util.encode");
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArquivoUtil.class);
-
-    /**
-     * Move o arquivo para outra pasta.
-     * @param file Aquivo de origem.
-     * @param filedest Arquivo de destino.
-     * @return True caso tenha sucesso em mover.
-     */
-    public static boolean mover(File file, File filedest) {
-        if (file == null || filedest == null) {
+    public static boolean move(File file, File file_destine) {
+        if (file == null || file_destine == null) {
             return false;
         }
         FileOutputStream os = null;
         FileInputStream input = null;
         try {
             input = new FileInputStream(file);
-            os = new FileOutputStream(filedest);
-            ArquivoUtil.garantirExistencia(filedest.getParentFile(), true);
-            if (!file.renameTo(filedest) && file.length() > 0) {
-                byte[] arquivoTemp = new byte[(int) file.length()];
-                if (input.read(arquivoTemp) != arquivoTemp.length) {
-                    LOG.warn("WARN: com o tamanho do arquivo e/ou leitura.");
+            os = new FileOutputStream(file_destine);
+            ArquivoUtil.garantirExistencia(file_destine.getParentFile(), true);
+            if (!file.renameTo(file_destine) && file.length() > 0) {
+                byte[] fileTemp = new byte[(int) file.length()];
+                if (input.read(fileTemp) != fileTemp.length) {
+                    log.warn("WARN: File over of max length size.");
                     return false;
                 }
-                os.write(arquivoTemp);
+                os.write(fileTemp);
                 if (!file.delete()) {
-                    LOG.warn("WARN: O arquivo não pode ser deletado.");
+                    log.warn("WARN: the file cannot be deleted.");
                     return false;
                 }
             }
         } catch (FileNotFoundException ex) {
-            LOG.error("ERROR: Não foi encontrado o arquivo. ", ex);
+            log.error("ERROR: File not found. ", ex);
             return false;
         } catch (IOException ex) {
-            LOG.error("ERROR: Não foi possivel ler o arquivo. ", ex);
+            log.error("ERROR: Cannot read file. ", ex);
             return false;
         } finally {
             try {
@@ -94,85 +82,48 @@ public class ArquivoUtil {
                     os.close();
                 }
             } catch (IOException ex) {
-                LOG.error("ERROR: Não foi possivel encerrar o input e/ou output. ", ex);
+                log.error("ERROR: Cannot end to input/output file stream. ", ex);
             }
         }
         return true;
     }
 
-    /**
-     * Move o arquivo para outra pasta.
-     * @param origem Aquivo de origem.
-     * @param destino Arquivo de destino.
-     * @return True caso tenha sucesso em mover.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean mover(String origem, String destino) throws IOException {
-        if (origem == null || origem.isEmpty() || destino == null || destino.isEmpty()) {
+    public static boolean move(String origin, String destine) throws IOException {
+        if (origin == null || origin.isEmpty() || destine == null || destine.isEmpty()) {
             return false;
         }
-        File file = new File(origem);
-        File filedest = new File(destino);
-        return ArquivoUtil.mover(file, filedest);
+        File file = new File(origin);
+        File filedest = new File(destine);
+        return ArquivoUtil.move(file, filedest);
     }
 
-    /**
-     * Cria um arquivo com base em seu nome e um conteudo em string.
-     * @param filename nome do arquivo
-     * @param content conteudo do arquivo
-     * @return Retorna true caso o arquivo tenha sido salvo com sucesso.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean salvar(String filename, String content) throws IOException {
+    public static boolean create(String filename, String content) throws IOException {
         if (filename == null || content == null) {
             return false;
         }
-        return salvar(new File(filename), content.getBytes(UTF8), UTF8);
+        return create(new File(filename), content.getBytes(UTF8), UTF8);
     }
 
-    /**
-     * Cria um arquivo com base em seu nome e um conteudo em string.
-     * @param arquivo Objeto File
-     * @param content conteudo do arquivo
-     * @param charset File de Charset do Arquivo, como UTF-8
-     * @return Retorna true caso o arquivo tenha sido salvo com sucesso.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean salvar(File arquivo, String content, String charset) throws IOException {
+    public static boolean create(File file, String content, String charset) throws IOException {
         if (content == null || charset == null || charset.isEmpty()) {
             return false;
         }
-        return ArquivoUtil.salvar(arquivo, content.getBytes(charset), charset);
+        return ArquivoUtil.create(file, content.getBytes(charset), charset);
     }
 
-    /**
-     * Cria um arquivo com base em seu nome e um conteudo em string.
-     * @param arquivo Objeto File
-     * @param content conteudo do arquivo
-     * @return Retorna true caso o arquivo tenha sido salvo com sucesso.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean salvar(File arquivo, String content) throws IOException {
+    public static boolean create(File file, String content) throws IOException {
         if (content == null) {
             return false;
         }
-        return ArquivoUtil.salvar(arquivo, content.getBytes(UTF8), UTF8);
+        return ArquivoUtil.create(file, content.getBytes(UTF8), UTF8);
     }
 
-    /**
-     * Cria um arquivo com base em seu nome e um conteudo em string.
-     * @param arquivo Objeto File
-     * @param content conteudo do arquivo
-     * @param charset Charset do Arquivo
-     * @return Retorna true caso o arquivo tenha sido salvo com sucesso.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean salvar(File arquivo, byte[] content, String charset) throws IOException {
-        if (arquivo == null || content == null || content.length == 0) {
+    public static boolean create(File file, byte[] content, String charset) throws IOException {
+        if (file == null || content == null || content.length == 0) {
             return false;
         }
-        try (OutputStreamWriter write = new OutputStreamWriter((OutputStream) new FileOutputStream(arquivo), charset)) {
-            if (!ArquivoUtil.garantirExistencia(arquivo)) {
+        try (OutputStreamWriter write = new OutputStreamWriter((OutputStream) new FileOutputStream(file), charset)) {
+            if (!ArquivoUtil.garantirExistencia(file)) {
                 return false;
             }
             Throwable throwable = null;
@@ -195,48 +146,36 @@ public class ArquivoUtil {
             }
             return true;
         } catch (IOException ex) {
-            LOG.error("ERROR: Para leitura de Arquivo. ", ex);
+            log.error("ERROR: On file read. ", ex);
             return false;
         }
     }
 
-    /**
-     * Lista os arquivos contidos em um diretorio.
-     * @param caminho Diretorio
-     * @return Lista de nome de Arquivos.
-     * @throws Exception
-     */
-    public static ArrayList<String> listarDiretorio(String caminho) throws Exception {
-        if (caminho == null) {
+    public static ArrayList<String> listFilesInPath(String path) throws Exception {
+        if (path == null) {
             return null;
         }
-        File arquivo = new File(caminho);
-        File[] lista = arquivo.listFiles();
-        if (lista == null) {
-            LOG.error("ERROR: O diretorio informado nao existe.");
+        File file = new File(path);
+        File[] file_list = file.listFiles();
+        if (file_list == null) {
+            log.error("ERROR: Path do not exists.");
             return null;
         }
-        if (lista.length == 0) {
-            LOG.warn("WARN: Nao foi encontrado nenhum arquivo.");
+        if (file_list.length == 0) {
+            log.warn("WARN: Path is Empty.");
             return null;
         }
-        ArrayList<String> listaArquivos = new ArrayList<>();
-        for (File lista1 : lista) {
-            if (lista1.isDirectory()) {
+        ArrayList<String> verified_file_list = new ArrayList<>();
+        for (File list : file_list) {
+            if (list.isDirectory()) {
                 continue;
             }
-            listaArquivos.add(lista1.getName());
+            verified_file_list.add(list.getName());
         }
-        return listaArquivos;
+        return verified_file_list;
     }
 
-    /**
-     * Copia um arquivo.
-     * @param in InputStream de Origem.
-     * @param out OutputStream de Destino.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    static final void copiar(InputStream in, OutputStream out) throws IOException {
+    public static void copy(InputStream in, OutputStream out) throws IOException {
         final int maxByte = 1024;
         int len;
         byte[] buffer = new byte[maxByte];
@@ -247,133 +186,86 @@ public class ArquivoUtil {
         out.close();
     }
 
-    /**
-     * Copia um arquivo.
-     * @param origem Arquivo de Origem.
-     * @param destino Arquivo de Destino.
-     * @param charset Tipo de Charset.
-     * @return True caso a cópia tenha sido feita com sucesso.
-     */
-    public static boolean copiar(File origem, File destino, String charset) {
-        if (origem == null || destino == null) {
+    public static boolean copy(File origin, File destine, String charset) {
+        if (origin == null || destine == null) {
             return false;
         }
-        if (!origem.isFile()) {
-            LOG.warn("WARN: O arquivo de origem nao existe para ser"
-                    + " copiado: " + origem);
+        if (!origin.isFile()) {
+            log.warn("WARN: The origin file does not exists: " + origin);
             return false;
         }
         try {
-            if (!ArquivoUtil.garantirExistencia(destino)) {
+            if (!ArquivoUtil.garantirExistencia(destine)) {
                 return false;
             }
-            return ArquivoUtil.salvar(destino, ArquivoUtil.ler(origem, charset), charset);
+            return ArquivoUtil.create(destine, ArquivoUtil.read(origin, charset), charset);
         } catch (IOException ex) {
-            LOG.error("ERROR: Falha ao realizar a leitura do arquivo. ", ex);
+            log.error("ERROR: Fail to read file. ", ex);
             return false;
         }
     }
 
-    /**
-     * Copia um arquivo.
-     * @param origem Arquivo de Origem.
-     * @param destino Arquivo de Destino.
-     * @return True caso a cópia tenha sido feita com sucesso.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean copiar(File origem, File destino) throws IOException {
-        return ArquivoUtil.copiar(origem, destino, UTF8);
+    public static boolean copy(File origin, File destine) throws IOException {
+        return ArquivoUtil.copy(origin, destine, UTF8);
     }
 
-    /**
-     * Apaga o arquivo.
-     * @param caminhoArquivo Arquivo a ser apagado.
-     * @return True caso tenha sucesso.
-     */
-    public static boolean apagar(String caminhoArquivo) {
-        if (caminhoArquivo == null) {
+    public static boolean erase(String path) {
+        if (path == null) {
             return false;
         }
-        if (new File(caminhoArquivo).delete()) {
-            LOG.debug("Arquivo apagado com sucesso.");
+        if (new File(path).delete()) {
+            log.debug("File successful deleted.");
             return true;
         }
-        LOG.warn("WARN: Arquivo nao pode ser apagado.");
+        log.warn("WARN: File cannot be deleted.");
         return false;
     }
 
-    /**
-     * Apaga o diretorio.
-     * @param caminhoDiretorio Diretorio a ser apagado.
-     * @return True caso tenha sucesso.
-     */
-    public static boolean apagarDiretorio(File caminhoDiretorio) {
-        if (caminhoDiretorio == null) {
+    public static boolean erasePath(File path) {
+        if (path == null) {
             return false;
         }
-        if (!ArquivoUtil.limparDiretorio(caminhoDiretorio)) {
-            LOG.warn("WARN: Nao foi possivel esvaziar o diretorio: "
-                    + caminhoDiretorio.getAbsolutePath());
+        if (!ArquivoUtil.cleanPath(path)) {
+            log.warn("WARN: Cannot erase the path: " + path.getAbsolutePath());
             return false;
         }
-        return caminhoDiretorio.delete();
+        return path.delete();
     }
 
-    /**
-     * Apaga os arquivos em um diretório.
-     * @param caminhoDiretorio Diretorio a ser apagado.
-     * @return True caso tenha sucesso.
-     */
-    public static boolean limparDiretorio(File caminhoDiretorio) {
+    public static boolean cleanPath(File path) {
         File[] oldFiles;
-        if (caminhoDiretorio == null) {
+        if (path == null) {
             return false;
         }
-        if (!caminhoDiretorio.isDirectory()) {
-            if (caminhoDiretorio.isFile()) {
-                throw new IllegalArgumentException("ERRO: O parametro"
-                        + " especificado aponta para um arquivo, e nao para um diretorio. ");
+        if (!path.isDirectory()) {
+            if (path.isFile()) {
+                throw new IllegalArgumentException("ERROR: The arg is a file not a path. ");
             }
-            LOG.warn("WARN: O diretorio nao existe para que seja"
-                    + " apagado: " + caminhoDiretorio.getAbsolutePath());
+            log.warn("WARN: The path does not exists: " + path.getAbsolutePath());
             return false;
         }
-        oldFiles = caminhoDiretorio.listFiles();
+        oldFiles = path.listFiles();
         for (File oldFile : oldFiles) {
             if (oldFile.isFile()) {
                 if (oldFile.delete()) {
                     continue;
                 }
-                LOG.warn("WARN: Nao foi possivel apagar o arquivo: "
-                        + oldFile.getAbsolutePath());
+                log.warn("WARN: Cannot erase the file: " + oldFile.getAbsolutePath());
                 continue;
             }
-            if (ArquivoUtil.apagarDiretorio(oldFile)) {
+            if (ArquivoUtil.erasePath(oldFile)) {
                 continue;
             }
-            LOG.warn("WARN: Nao foi possivel apagar o subdiretorio:"
-                    + oldFile.getAbsolutePath());
+            log.warn("WARN: Cannot erase the sub-path:" + oldFile.getAbsolutePath());
             return false;
         }
-        return caminhoDiretorio.listFiles().length == 0;
+        return oldFiles.length == 0;
     }
 
-    /**
-     * Transforma o arquivo em Byte Array.
-     * @param in Objeto ZipInputStream que representa o arquivo
-     * @return Retorna o Byte Array que representa o arquivo.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
     public static byte[] toByteArray(ZipInputStream in) throws IOException {
         return ArquivoUtil.toByteArray((InputStream) in);
     }
 
-    /**
-     * Transforma o arquivo em Byte Array.
-     * @param in Objeto InputStream que representa o arquivo
-     * @return Retorna o Byte Array que representa o arquivo.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
     public static byte[] toByteArray(InputStream in) throws IOException {
         final int maxByte = 2048;
         if (in == null) {
@@ -388,38 +280,20 @@ public class ArquivoUtil {
                 buffer.write(bytes, 0, bytesRead);
             }
         } catch (IOException ex) {
-            LOG.warn("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+            log.warn("ERROR: Fail to read file. ", ex);
         }
         return buffer.toByteArray();
     }
 
-    /**
-     * Lê um arquivo.
-     * @param aFile Arquivo.
-     * @return String que representa o arquivo.
-     */
-    public static String ler(File aFile) {
-        return ArquivoUtil.ler(aFile, UTF8, true);
+    public static String read(File aFile) {
+        return ArquivoUtil.read(aFile, UTF8, true);
     }
 
-    /**
-     * Lê um arquivo.
-     * @param aFile Arquivo.
-     * @param charset Charset do Arquivo (Ex: UTF-8).
-     * @return String que representa o arquivo.
-     */
-    public static String ler(File aFile, String charset) {
-        return ArquivoUtil.ler(aFile, charset, true);
+    public static String read(File aFile, String charset) {
+        return ArquivoUtil.read(aFile, charset, true);
     }
 
-    /**
-     * Lê um arquivo.
-     * @param aFile Arquivo.
-     * @param charset Charset do Arquivo (Ex: UTF-8).
-     * @param systemLineSeparator Separador de Linha do SO (Sistema Operacional).
-     * @return String que representa o arquivo.
-     */
-    public static String ler(File aFile, String charset, boolean systemLineSeparator) {
+    public static String read(File aFile, String charset, boolean systemLineSeparator) {
         StringBuilder contents;
         block28:
         {
@@ -451,16 +325,15 @@ public class ArquivoUtil {
                     break block28;
                 }
                 if (aFile.length() > Integer.MAX_VALUE) {
-                    throw new IllegalArgumentException("ERRO: O tamanho do"
-                            + " arquivo excede o limite maximo de 2147483647 bytes");
+                    throw new IllegalArgumentException("ERROR: The length of file is over of 2147483647 bytes");
                 }
                 char[] chars = new char[(int) aFile.length()];
                 reader.read(chars);
                 return new String(chars).trim();
             } catch (FileNotFoundException ex) {
-                LOG.error("ERROR: O arquivo não foi encontrado. ", ex);
+                log.error("ERROR: The file does not found. ", ex);
             } catch (IOException ex) {
-                LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+                log.error("ERROR: Fail to read the file. ", ex);
             } finally {
                 try {
                     if (input != null) {
@@ -473,37 +346,25 @@ public class ArquivoUtil {
                         reader.close();
                     }
                 } catch (IOException ex) {
-                    LOG.error(ex.getMessage(), (Throwable) ex);
+                    log.error(ex.getMessage(), (Throwable) ex);
                 }
             }
         }
         return contents.toString();
     }
 
-    /**
-     * Verifica o arquivo de acordo com um tamanho limite.
-     * @param arquivo Arquivo a ser verificado.
-     * @param tamanhoLimiteKB Tamanho limite do arquivo.
-     * @return True caso o arquivo esteja dentro do tamanho limite.
-     */
-    public static boolean tamanhoLimite(File arquivo, long tamanhoLimiteKB) {
+    public static boolean isMaxSize(File file, long max_size_kb) {
         final int maxByte = 1024;
-        if (arquivo == null) {
+        if (file == null) {
             return false;
         }
 
-        long tamanho = arquivo.length();
-        int tamanhoKB = (int) (tamanho / maxByte);
+        long size = file.length();
+        int size_in_kb = (int) (size / maxByte);
 
-        return (long) tamanhoKB < tamanhoLimiteKB;
+        return (long) size_in_kb < max_size_kb;
     }
 
-    /**
-     * Transforma o arquivo em Byte Array.
-     * @param file
-     * @return Retorna o Byte Array que representa o arquivo.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
     public static byte[] toByteArray(File file) throws IOException {
         if (file == null || !file.exists()) {
             return null;
@@ -516,66 +377,52 @@ public class ArquivoUtil {
             f = new FileInputStream(file);
             f.read(b);
         } catch (IOException ex) {
-            LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+            log.error("ERROR: Fail to read the file. ", ex);
         } finally {
             try {
                 f.close();
             } catch (IOException ex) {
-                LOG.error("ERROR: Falha ao fechar o FileInputStream. ", ex);
+                log.error("ERROR: Fail to close the FileInputStream. ", ex);
             }
         }
         return b;
     }
 
-    /**
-     * Transforma o arquivo em Byte Array.
-     * @param caminhoArquivo Path do Arquivo.
-     * @return Retorna o Byte Array que representa o arquivo.
-     * @throws FileNotFoundException Arquivo nao encontrado.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static byte[] toByteArray(String caminhoArquivo) throws FileNotFoundException, IOException {
-        if (caminhoArquivo == null) {
+    public static byte[] toByteArray(String file_path) throws FileNotFoundException, IOException {
+        if (file_path == null) {
             return null;
         }
-        return ArquivoUtil.toByteArray(new File(caminhoArquivo));
+        return ArquivoUtil.toByteArray(new File(file_path));
     }
 
-    /**
-     * Garante que o diretorio ou arquivo existe e caso seja diretório ele pode ser criado.
-     * @param arquivo Nome do arquivo ou diretório.
-     * @param createDirectory Flag de criação de diretório.
-     * @return True caso exista o diretório ou arquivo.
-     * @throws IOException ApiError de Leitura de Arquivo.
-     */
-    public static boolean garantirExistencia(File arquivo, boolean createDirectory) throws IOException {
-        if (arquivo == null) {
-            LOG.warn("WARN: O arquivo nao pode ser null.");
+    public static boolean garantirExistencia(File file, boolean createDirectory) throws IOException {
+        if (file == null) {
+            log.warn("WARN: The file is null.");
             return false;
         }
-        if (!arquivo.exists()) {
+        if (!file.exists()) {
             if (createDirectory) {
-                if (!arquivo.mkdirs()) {
+                if (!file.mkdirs()) {
                     return false;
                 }
             } else {
-                if (arquivo.getParentFile() != null && !arquivo.getParentFile()
-                        .isDirectory() && !arquivo.getParentFile().mkdirs()) {
+                if (file.getParentFile() != null && !file.getParentFile()
+                        .isDirectory() && !file.getParentFile().mkdirs()) {
                     return false;
                 }
-                if (!arquivo.createNewFile()) {
+                if (!file.createNewFile()) {
                     return false;
                 }
             }
         } else {
-            if (createDirectory && arquivo.isFile()) {
-                LOG.warn("WARN: Existe um arquivo com o nome do"
+            if (createDirectory && file.isFile()) {
+                log.warn("WARN: Existe um file com o nome do"
                         + " diretorio cuja criacao foi solicitada: "
-                        + arquivo.getAbsolutePath());
+                        + file.getAbsolutePath());
                 return false;
             }
-            if (!createDirectory && arquivo.isDirectory()) {
-                LOG.warn((Object) "WARN: Existe uma pasta com o nome do arquivo"
+            if (!createDirectory && file.isDirectory()) {
+                log.warn((Object) "WARN: Existe uma pasta com o nome do file"
                         + " cuja criacao foi solicitada.");
                 return false;
             }

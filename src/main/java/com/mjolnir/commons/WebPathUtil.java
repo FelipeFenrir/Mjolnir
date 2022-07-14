@@ -7,17 +7,19 @@ package com.mjolnir.commons;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.mjolnir.toolbox.stardart.RegExUtil;
+import com.mjolnir.toolbox.stardart.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- *     Commons validations utils.
+ *     Web path validations utils.
  * </p>
  *
  * @author Felipe de Andrade Batista
  */
 @Slf4j
-public class ValidationUtil {
+public class WebPathUtil {
 
     private static final String EMAIL_PATTERN = RegExUtil.REGEX_EMAIL_PATTERN;
     private static final String DOMAIN_PATTERN = RegExUtil.REGEX_DOMAIN_PATTERN;
@@ -25,9 +27,6 @@ public class ValidationUtil {
     private static final Pattern pEmailOnly;
     private static final Pattern pDomainOnly;
 
-    /*
-     * SetUp Patterns.
-     */
     static {
         pEmailOnly = Pattern.compile(EMAIL_PATTERN);
         pDomainOnly = Pattern.compile(DOMAIN_PATTERN);

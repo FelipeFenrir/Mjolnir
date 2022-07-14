@@ -2,11 +2,13 @@
  * Copyright (c) 2020. Fenrir Solucoes em Tecnologia. All rights reserved.
  *  Fenrir Systems, Odin System and All the Programing Code of this softwares are private.
  */
-package com.mjolnir.commons;
+package com.mjolnir.toolbox.stardart;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.mjolnir.toolbox.app.PropertiesUtil;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * @see <a href="https://regex101.com/">regex101.com</a>
  */
 @Slf4j
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RegExUtil {
 
     private static final PropertiesUtil PROPERTIE = PropertiesUtil.getInstance();

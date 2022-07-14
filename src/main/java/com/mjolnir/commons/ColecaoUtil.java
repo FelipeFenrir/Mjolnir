@@ -10,27 +10,12 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Classe utilitaria para Coleções.
- *
- * @author Felipe de Andrade Batista.
- */
 public class ColecaoUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ColecaoUtil.class);
 
-    /**
-     * Contrutor.
-     */
-    public ColecaoUtil() {
-    }
+    private ColecaoUtil() {}
 
-    /**
-     * Verifica se a Coleção é nula ou vazia.
-     *
-     * @param colecao
-     * @return True caso a coleção esteja nula ou vazia.
-     */
     public static Boolean ehNuloOuVazio(Collection<?> colecao) {
         Boolean ret = Boolean.TRUE;
         if (colecao != null && !colecao.isEmpty()) {
