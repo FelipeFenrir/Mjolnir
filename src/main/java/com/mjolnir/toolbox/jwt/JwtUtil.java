@@ -4,11 +4,11 @@
  */
 package com.mjolnir.toolbox.jwt;
 
-import com.mjolnir.toolbox.jwt.ConfigJwt;
-import com.mjolnir.toolbox.jwt.UserClaims;
+//import com.mjolnir.toolbox.jwt.ConfigJwt;
+//import com.mjolnir.toolbox.jwt.UserClaims;
 
 import java.util.Date;
-import java.util.Map;
+//import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -18,7 +18,7 @@ import javax.crypto.SecretKey;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.WeakKeyException;

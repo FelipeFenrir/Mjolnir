@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -245,21 +246,25 @@ public class ArquivoUtil {
             return false;
         }
         oldFiles = path.listFiles();
-        for (File oldFile : oldFiles) {
-            if (oldFile.isFile()) {
-                if (oldFile.delete()) {
+        if(Objects.nonNull(oldFiles)) {
+            for (File oldFile : oldFiles) {
+                if (oldFile.isFile()) {
+                    if (oldFile.delete()) {
+                        continue;
+                    }
+                    log.warn("WARN: Cannot erase the file: " + oldFile.getAbsolutePath());
                     continue;
                 }
-                log.warn("WARN: Cannot erase the file: " + oldFile.getAbsolutePath());
-                continue;
+                if (ArquivoUtil.erasePath(oldFile)) {
+                    continue;
+                }
+                log.warn("WARN: Cannot erase the sub-path:" + oldFile.getAbsolutePath());
+                return false;
             }
-            if (ArquivoUtil.erasePath(oldFile)) {
-                continue;
-            }
-            log.warn("WARN: Cannot erase the sub-path:" + oldFile.getAbsolutePath());
+            return oldFiles.length == 0;
+        } else {
             return false;
         }
-        return oldFiles.length == 0;
     }
 
     public static byte[] toByteArray(ZipInputStream in) throws IOException {
@@ -306,7 +311,6 @@ public class ArquivoUtil {
             InputStreamReader reader = null;
             try {
                 fileInput = new FileInputStream(aFile);
-                reader = null;
                 if (charset == null || charset.trim().isEmpty()) {
                     return null;
                 }
@@ -402,17 +406,13 @@ public class ArquivoUtil {
         }
         if (!file.exists()) {
             if (createDirectory) {
-                if (!file.mkdirs()) {
-                    return false;
-                }
+                return file.mkdirs();
             } else {
                 if (file.getParentFile() != null && !file.getParentFile()
                         .isDirectory() && !file.getParentFile().mkdirs()) {
                     return false;
                 }
-                if (!file.createNewFile()) {
-                    return false;
-                }
+                return file.createNewFile();
             }
         } else {
             if (createDirectory && file.isFile()) {
@@ -499,7 +499,7 @@ public class ArquivoUtil {
         try {
             url = ArquivoUtil.class.getResource(caminhoRelativo);
         } catch (Exception e) {
-            LOG.error("ERROR: Falha ao recuperar recursos. ", e);
+            log.error("ERROR: Falha ao recuperar recursos. ", e);
         }
         if (url == null) {
             return null;
@@ -547,7 +547,7 @@ public class ArquivoUtil {
                 if (!arquivo.isFile()) {
                     continue;
                 }
-                LOG.debug("Compactando: " + s);
+                log.debug("Compactando: " + s);
                 streamDeEntrada = new FileInputStream(arquivo);
                 origem = new BufferedInputStream(streamDeEntrada, maxByte);
                 entry = new ZipEntry(diretorio + s);
@@ -560,7 +560,7 @@ public class ArquivoUtil {
             saida.close();
             return true;
         } catch (IOException e) {
-            LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", e);
+            log.error("ERROR: Falha ao realizar a leitura do Arquivo. ", e);
             return false;
         }
     }
@@ -666,7 +666,7 @@ public class ArquivoUtil {
             zipOutputStream.close();
             return baos.toByteArray();
         } catch (IOException ex) {
-            LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+            log.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
             return null;
         }
     }
@@ -714,7 +714,7 @@ public class ArquivoUtil {
             zipOutputStream.close();
             return baos.toByteArray();
         } catch (IOException ex) {
-            LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+            log.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
             return null;
         }
     }
@@ -833,9 +833,9 @@ public class ArquivoUtil {
                 lista.add(line);
             }
         } catch (FileNotFoundException ex) {
-            LOG.error("ERROR: O arquivo não foi encontrado. ", ex);
+            log.error("ERROR: O arquivo não foi encontrado. ", ex);
         } catch (IOException ex) {
-            LOG.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
+            log.error("ERROR: Falha ao realizar a leitura do Arquivo. ", ex);
         } finally {
             try {
                 if (input != null) {
@@ -848,7 +848,7 @@ public class ArquivoUtil {
                     reader.close();
                 }
             } catch (IOException ex) {
-                LOG.error(ex.getMessage(), (Throwable) ex);
+                log.error(ex.getMessage(), (Throwable) ex);
             }
         }
         return lista;
