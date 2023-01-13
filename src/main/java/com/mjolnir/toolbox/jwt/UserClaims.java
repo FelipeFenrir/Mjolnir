@@ -12,7 +12,7 @@ public class UserClaims {
     private String userName;
     private String json;
     private Map<String, String> permissions;
-    private Map<String, Map> roles;
+    private Map<String, Map<?,?>> roles;
 
     /**
      * Constructor.
